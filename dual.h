@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cmath>
+
 template <typename T> class Dual {
 private:
   T m_real;
@@ -73,4 +75,46 @@ template <typename T> Dual<T> operator*(const T &scalar, const Dual<T> &dual) {
 template <typename T> Dual<T> operator/(const T &scalar, const Dual<T> &dual) {
   const T denom = dual.real() * dual.real();
   return Dual<T>(scalar / dual.real(), -scalar * dual.dual() / denom);
+}
+
+// Elementary operations
+
+// sqrt(a + b eps) = sqrt(a) + b / (2 sqrt(a)) eps
+template <typename T> Dual<T> sqrt(const Dual<T> &x) {
+  const T r = std::sqrt(x.real());
+  return Dual<T>(r, x.dual() / (T(2) * r));
+}
+
+// (a + b eps)^n = a^n + b n (a + b eps)^(n-1) eps
+template <typename T> Dual<T> pow(const Dual<T> &x, const T &n) {
+  const T a = x.real();
+  const T r = std::pow(a, n);
+  return Dual<T>(r, x.dual() * n * std::pow(a, n - T(1)));
+}
+
+// exp(a + b eps) = exp(a) + b exp(a) eps
+template <typename T> Dual<T> exp(const Dual<T> &x) {
+  const T r = std::exp(x.real());
+  return Dual<T>(r, r * x.dual());
+}
+
+// log(a + b eps) = log(a) + b / a eps
+template <typename T> Dual<T> log(const Dual<T> &x) {
+  return Dual<T>(std::log(x.real()), x.dual() / x.real());
+}
+
+// sin(a + b eps) = sin(a) + b cos(a)
+template <typename T> Dual<T> sin(const Dual<T> &x) {
+  return Dual<T>(std::sin(x.real()), x.dual() * std::cos(x.real()));
+}
+
+// cos(a + b eps) = cos(a) - b sin(a)
+template <typename T> Dual<T> cos(const Dual<T> &x) {
+  return Dual<T>(std::cos(x.real()), -x.dual() * std::sin(x.real()));
+}
+
+// tan(a + b eps) = tan(a) + b ( 1 + tan(a)^2) eps
+template <typename T> Dual<T> tan(const Dual<T> &x) {
+  const T r = std::tan(x.real());
+  return Dual<T>(r, x.dual() * (T(1) + r * r));
 }
