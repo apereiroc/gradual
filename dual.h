@@ -9,6 +9,7 @@ private:
 
 public:
   // Constructor
+  Dual() : m_real(T(0)), m_dual(T(0)) {}
   Dual(T real, T dual) : m_real(real), m_dual(dual) {}
 
   // Accessors
