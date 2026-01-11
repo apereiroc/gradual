@@ -1,3 +1,24 @@
+
+# clang caches
 .cache/
+
+# compile commands and friends
 *.json
+
+# ignore object files
+*.o
+
+# ignore test objects
+test_*
+!test_*.cc
+
+# ignore main files
 main
+main.o
+
+# scons stuff
+*.dblite
+
+# ignore all markdown files except readme
+*.md
+!README.md
