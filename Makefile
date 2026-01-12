@@ -14,13 +14,17 @@ test_vector: test_vector.cc vector.h
 test_gradient: test_gradient.cc gradient.h dual.h vector.h
 	clang++ -o test_gradient test_gradient.cc -std=c++20 $(shell pkg-config --cflags --libs catch2-with-main)
 
-test: test_dual test_vector test_gradient
+test_optimiser: test_optimiser.cc optimiser.h gradient.h dual.h vector.h
+	clang++ -o test_optimiser test_optimiser.cc -std=c++20 $(shell pkg-config --cflags --libs catch2-with-main)
+
+test: test_dual test_vector test_gradient test_optimiser
 	./test_dual
 	./test_vector
 	./test_gradient
+	./test_optimiser
 
 compile_commands:
-	@bear -- $(MAKE) main test_dual test_vector test_gradient
+	@bear -- $(MAKE) main test_dual test_vector test_gradient test_optimiser
 
 clean:
-	rm -f main test_dual test_vector test_gradient compile_commands.json
+	rm -f main test_dual test_vector test_gradient test_optimiser compile_commands.json

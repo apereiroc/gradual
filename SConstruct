@@ -48,6 +48,8 @@ test_vector = env_test.Program(target="test_vector", source="test_vector.cc")
 
 test_gradient = env_test.Program(target="test_gradient", source="test_gradient.cc")
 
+test_optimiser = env_test.Program(target="test_optimiser", source="test_optimiser.cc")
+
 # Default target (also emit compile_commands.json)
 Default([main, compdb])
 
@@ -55,7 +57,7 @@ Default([main, compdb])
 # Test target - build and run all tests
 def run_tests(target, source, env):
     """Run all test executables"""
-    tests = ["test_dual", "test_vector", "test_gradient"]
+    tests = ["test_dual", "test_vector", "test_gradient", "test_optimiser"]
     for test in tests:
         print(f"\n{'='*80}")
         print(f"Running {test}...")
@@ -67,12 +69,12 @@ def run_tests(target, source, env):
 
 
 # Create test alias that depends on test executables
-test_targets = [test_dual, test_vector, test_gradient]
+test_targets = [test_dual, test_vector, test_gradient, test_optimiser]
 test_runner = env.Command("run_tests", test_targets, run_tests)
 env.Alias("test", test_runner)
 env.AlwaysBuild(test_runner)
 
 # Clean target
 env.Clean(
-    ".", ["main", "test_dual", "test_vector", "test_gradient", "compile_commands.json"]
+    ".", ["main", "test_dual", "test_vector", "test_gradient", "test_optimiser", "compile_commands.json"]
 )
