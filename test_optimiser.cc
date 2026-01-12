@@ -163,3 +163,76 @@ TEST_CASE("Optimiser: 4D function", "[optimiser]") {
   REQUIRE(result.point()[2] == Approx(3.0).margin(1e-4));
   REQUIRE(result.point()[3] == Approx(4.0).margin(1e-4));
 }
+
+TEST_CASE("Optimiser: CTAD with explicit starting point", "[optimiser][api]") {
+  // Test that CTAD works for Vector construction
+  auto f = [](const Dual<double> &x, const Dual<double> &y) {
+    return (x - 3.0) * (x - 3.0) + (y - 4.0) * (y - 4.0);
+  };
+
+  Vector start{10.0, 10.0};  // CTAD deduces Vector<double, 2>
+  Optimiser<double> opt(0.1, 1e-6, 1000);
+
+  auto result = opt.run(f, start);
+
+  REQUIRE(result.converged());
+  REQUIRE(result.point()[0] == Approx(3.0).margin(1e-4));
+  REQUIRE(result.point()[1] == Approx(4.0).margin(1e-4));
+}
+
+TEST_CASE("Optimiser: run_from_zero unbounded", "[optimiser][api]") {
+  // Test run_from_zero for clean zero-initialization
+  auto f = [](const Dual<double> &x, const Dual<double> &y,
+              const Dual<double> &z) {
+    return x * x + y * y + z * z;
+  };
+
+  Optimiser<double> opt(0.1, 1e-6, 1000);
+
+  auto result = opt.run_from_zero<3>(f);
+
+  REQUIRE(result.converged());
+  REQUIRE(result.point()[0] == Approx(0.0).margin(1e-4));
+  REQUIRE(result.point()[1] == Approx(0.0).margin(1e-4));
+  REQUIRE(result.point()[2] == Approx(0.0).margin(1e-4));
+  REQUIRE(result.value() == Approx(0.0).margin(1e-6));
+}
+
+TEST_CASE("Optimiser: run_from_zero bounded", "[optimiser][api]") {
+  // Test run_from_zero with bounds
+  auto f = [](const Dual<double> &x, const Dual<double> &y) {
+    return (x - 5.0) * (x - 5.0) + (y - 5.0) * (y - 5.0);
+  };
+
+  Vector<double, 2> lower{-2.0, -2.0};
+  Vector<double, 2> upper{2.0, 2.0};
+
+  Optimiser<double> opt(0.1, 1e-6, 1000);
+
+  auto result = opt.run_from_zero<2>(f, lower, upper);
+
+  // Minimum is at (5,5) but box is [-2,2] x [-2,2]
+  // Should clamp to boundary at (2,2)
+  REQUIRE(result.point()[0] == Approx(2.0).margin(1e-4));
+  REQUIRE(result.point()[1] == Approx(2.0).margin(1e-4));
+  REQUIRE(result.grad() > 1e-6);  // Non-zero gradient at boundary
+}
+
+TEST_CASE("Optimiser: CTAD with high-dimensional vector", "[optimiser][api]") {
+  // Test CTAD works for high-dimensional vectors
+  auto f = [](const Dual<double> &a, const Dual<double> &b,
+              const Dual<double> &c, const Dual<double> &d,
+              const Dual<double> &e) {
+    return a * a + b * b + c * c + d * d + e * e;
+  };
+
+  Vector start{1.0, 2.0, 3.0, 4.0, 5.0};  // CTAD: Vector<double, 5>
+  Optimiser<double> opt(0.1, 1e-6, 1000);
+
+  auto result = opt.run(f, start);
+
+  REQUIRE(result.converged());
+  for (size_t i = 0; i < 5; i++) {
+    REQUIRE(result.point()[i] == Approx(0.0).margin(1e-4));
+  }
+}

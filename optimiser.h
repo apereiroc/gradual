@@ -90,4 +90,17 @@ public:
     }
     return run(f, start, lower, upper);
   }
+
+  // unbounded optimization from zero starting point
+  template <std::size_t N, typename Func>
+  Result<T, N> run_from_zero(Func f) {
+    return run(f, Vector<T, N>{});
+  }
+
+  // bounded optimization from zero starting point
+  template <std::size_t N, typename Func>
+  Result<T, N> run_from_zero(Func f, const Vector<T, N> &lower,
+                              const Vector<T, N> &upper) {
+    return run(f, Vector<T, N>{}, lower, upper);
+  }
 };
