@@ -1,0 +1,50 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-and-test:
+    name: Build and Test (Ubuntu, ${{ matrix.mode }})
+    runs-on: ubuntu-latest
+    
+    strategy:
+      fail-fast: false
+      matrix:
+        mode: [debug, release]
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y scons libfmt-dev catch2
+    
+    - name: Build in ${{ matrix.mode }} mode
+      run: |
+        if [ "${{ matrix.mode }}" = "release" ]; then
+          scons --release
+        else
+          scons
+        fi
+    
+    - name: Verify compile_commands.json exists
+      run: |
+        if [ ! -f compile_commands.json ]; then
+          echo "Error: compile_commands.json not generated"
+          exit 1
+        fi
+        echo "compile_commands.json successfully generated"
+    
+    - name: Run tests in ${{ matrix.mode }} mode
+      run: |
+        if [ "${{ matrix.mode }}" = "release" ]; then
+          scons test --release
+        else
+          scons test
+        fi
