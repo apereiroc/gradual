@@ -30,27 +30,27 @@ private:
 public:
   // Declare friend functions - forward declaration needed
   template <typename U, std::size_t M>
-  friend Vector<U, M> operator*(const U &scalar, const Vector<U, M> &vec);
+  friend constexpr Vector<U, M> operator*(const U &scalar, const Vector<U, M> &vec);
 
   // Constructor
-  Vector() = default;
+  constexpr Vector() = default;
   template <typename... Args>
-  Vector(Args... args) : m_data{static_cast<T>(args)...} {
+  constexpr Vector(Args... args) : m_data{static_cast<T>(args)...} {
   }
 
   // Accessors
-  [[nodiscard]] size_t size() const {
+  [[nodiscard]] constexpr size_t size() const {
     return m_data.size();
   }
-  const T &operator[](size_t index) const {
+  constexpr const T &operator[](size_t index) const {
     return m_data.at(index);
   }
-  T &operator[](size_t index) {
+  constexpr T &operator[](size_t index) {
     return m_data.at(index);
   }
 
   // Norm
-  [[nodiscard]] T norm2() const {
+  [[nodiscard]] constexpr T norm2() const {
     T result(0);
     for (const T &x : m_data)
       result += x * x;
@@ -58,12 +58,12 @@ public:
     return result;
   }
 
-  [[nodiscard]] T norm() const {
+  [[nodiscard]] constexpr T norm() const {
     return std::sqrt(this->norm2());
   }
 
   // Vector-Vector binary ops
-  Vector operator+(const Vector &other) const {
+  constexpr Vector operator+(const Vector &other) const {
     Vector result;
     for (size_t i = 0; i < N; ++i) {
       result.m_data[i] = this->m_data[i] + other.m_data[i];
@@ -71,7 +71,7 @@ public:
     return result;
   }
 
-  Vector operator-(const Vector &other) const {
+  constexpr Vector operator-(const Vector &other) const {
     Vector result;
     for (size_t i = 0; i < N; ++i) {
       result.m_data[i] = this->m_data[i] - other.m_data[i];
@@ -80,14 +80,14 @@ public:
   }
 
   // Dot product
-  T operator*(const Vector &other) const {
+  constexpr T operator*(const Vector &other) const {
     T result(0);
     for (size_t i = 0; i < N; ++i)
       result += this->m_data[i] * other[i];
     return result;
   }
 
-  Vector operator*(const T &scalar) const {
+  constexpr Vector operator*(const T &scalar) const {
     Vector result;
     for (size_t i = 0; i < N; ++i) {
       result.m_data[i] = this->m_data[i] * scalar;
@@ -95,7 +95,7 @@ public:
     return result;
   }
 
-  Vector operator/(const T &scalar) const {
+  constexpr Vector operator/(const T &scalar) const {
     Vector result;
     for (size_t i = 0; i < N; ++i) {
       result.m_data[i] = this->m_data[i] / scalar;
@@ -115,6 +115,6 @@ Vector(T, Rest...) -> Vector<T, 1 + sizeof...(Rest)>;
 
 // Scalar-Vector binary ops (free functions)
 template <typename T, std::size_t N>
-Vector<T, N> operator*(const T &scalar, const Vector<T, N> &vec) {
+constexpr Vector<T, N> operator*(const T &scalar, const Vector<T, N> &vec) {
   return vec * scalar;
 }

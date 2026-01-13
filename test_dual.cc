@@ -4,7 +4,6 @@
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 
 using Catch::Approx;
-using Catch::Matchers::WithinAbs;
 
 TEST_CASE("Dual number construction", "[dual]") {
   SECTION("Constructor with no arguments") {
@@ -188,7 +187,7 @@ TEST_CASE("Derivative of polynomial", "[dual][derivatives]") {
   // f(x) = 2x^2 + 3x + 1
   // f'(x) = 4x + 3
   auto f = [](Dual<double> x) {
-    return 2 * x * x + 3 * x + 1;
+    return 2.0 * x * x + 3.0 * x + 1.0;
   };
 
   SECTION("At x = 0") {

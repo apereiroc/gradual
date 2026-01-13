@@ -24,7 +24,7 @@ constexpr Vector<Dual<T>, N> make_dual_basis(const Vector<T, N> &point) {
 // this yields the gradient projected at dimension Dim
 // i.e., ∂f/∂x_Dim
 template <typename T, std::size_t N, std::size_t Dim, typename Func>
-T get_partial_derivative(Func f, const Vector<T, N> &point) {
+constexpr T get_partial_derivative(Func f, const Vector<T, N> &point) {
   auto duals = make_dual_basis<T, N, Dim>(point);
 
   // unpack duals into function call
@@ -39,7 +39,7 @@ T get_partial_derivative(Func f, const Vector<T, N> &point) {
 
 // get all gradients using index_sequence
 template <typename T, std::size_t N, typename Func, std::size_t... Dims>
-Vector<T, N>
+constexpr Vector<T, N>
 get_gradient_impl(Func f, const Vector<T, N> &point, std::index_sequence<Dims...>) {
   Vector<T, N> grad;
   // fill gradients
@@ -49,6 +49,6 @@ get_gradient_impl(Func f, const Vector<T, N> &point, std::index_sequence<Dims...
 }
 
 template <typename T, std::size_t N, typename Func>
-Vector<T, N> gradient(Func f, const Vector<T, N> &point) {
+constexpr Vector<T, N> gradient(Func f, const Vector<T, N> &point) {
   return get_gradient_impl(f, point, std::make_index_sequence<N>{});
 }

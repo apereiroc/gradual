@@ -16,28 +16,28 @@ private:
   bool m_converged{};
 
 public:
-  Result(const Vector<T, N> &point,
-         T value,
-         T grad,
-         std::size_t num_iterations,
-         bool converged)
+  constexpr Result(const Vector<T, N> &point,
+                   T value,
+                   T grad,
+                   std::size_t num_iterations,
+                   bool converged)
       : m_point(point), m_value(value), m_grad(grad), m_num_iterations(num_iterations),
         m_converged(converged) {
   }
 
-  const Vector<T, N> &point() const {
+  constexpr const Vector<T, N> &point() const {
     return m_point;
   }
-  T value() const {
+  constexpr T value() const {
     return m_value;
   }
-  T grad() const {
+  constexpr T grad() const {
     return m_grad;
   }
-  std::size_t num_iterations() const {
+  constexpr std::size_t num_iterations() const {
     return m_num_iterations;
   }
-  bool converged() const {
+  constexpr bool converged() const {
     return m_converged;
   }
 };
