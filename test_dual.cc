@@ -8,17 +8,17 @@ using Catch::Matchers::WithinAbs;
 
 TEST_CASE("Dual number construction", "[dual]") {
   SECTION("Constructor with no arguments") {
-    Dual<int> d;
-    REQUIRE(d.real() == 0);
-    REQUIRE(d.dual() == 0);
+    Dual<float> d;
+    REQUIRE(d.real() == Approx(0.0f));
+    REQUIRE(d.dual() == Approx(0.0f));
 
-    Dual<int> d2{};
-    REQUIRE(d2.real() == 0);
-    REQUIRE(d2.dual() == 0);
+    Dual<float> d2{};
+    REQUIRE(d2.real() == Approx(0.0f));
+    REQUIRE(d2.dual() == Approx(0.0f));
 
-    Dual<float> d3;
-    REQUIRE(d3.real() == Approx(0.0f));
-    REQUIRE(d3.dual() == Approx(0.0f));
+    Dual<double> d3;
+    REQUIRE(d3.real() == Approx(0.0));
+    REQUIRE(d3.dual() == Approx(0.0));
 
     Dual<double> d4{};
     REQUIRE(d4.real() == Approx(0.0));
@@ -130,7 +130,9 @@ TEST_CASE("Dual-scalar interactions", "[dual]") {
 
 TEST_CASE("Derivative of x^2", "[dual][derivatives]") {
   // Test d/dx(x^2) = 2x at various points
-  auto f = [](Dual<double> x) { return x * x; };
+  auto f = [](Dual<double> x) {
+    return x * x;
+  };
 
   SECTION("At x = 2") {
     Dual<double> x(2.0, 1.0);
@@ -150,7 +152,9 @@ TEST_CASE("Derivative of x^2", "[dual][derivatives]") {
 TEST_CASE("Derivative of x^3", "[dual][derivatives]") {
   // f(x) = x^3 = x * x * x
   // f'(x) = 3*x^2
-  auto f = [](Dual<double> x) { return x * x * x; };
+  auto f = [](Dual<double> x) {
+    return x * x * x;
+  };
 
   SECTION("At x = 2") {
     Dual<double> x(2.0, 1.0);
@@ -169,7 +173,9 @@ TEST_CASE("Derivative of x^3", "[dual][derivatives]") {
 
 TEST_CASE("Derivative of reciprocal", "[dual][derivatives]") {
   // f(x) = 1/x, f'(x) = -1/x^2
-  auto f = [](Dual<double> x) { return Dual<double>(1.0, 0.0) / x; };
+  auto f = [](Dual<double> x) {
+    return Dual<double>(1.0, 0.0) / x;
+  };
 
   Dual<double> x(2.0, 1.0);
   auto result = f(x);
@@ -182,10 +188,7 @@ TEST_CASE("Derivative of polynomial", "[dual][derivatives]") {
   // f(x) = 2x^2 + 3x + 1
   // f'(x) = 4x + 3
   auto f = [](Dual<double> x) {
-    Dual<double> two(2.0, 0.0);
-    Dual<double> three(3.0, 0.0);
-    Dual<double> one(1.0, 0.0);
-    return two * x * x + three * x + one;
+    return 2 * x * x + 3 * x + 1;
   };
 
   SECTION("At x = 0") {

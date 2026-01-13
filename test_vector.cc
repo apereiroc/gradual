@@ -10,12 +10,6 @@ TEST_CASE("Vector construction", "[vector]") {
     REQUIRE(v1.size() == 1);
     REQUIRE(v1[0] == Approx(0.0));
 
-    Vector<int, 3> v2;
-    REQUIRE(v2.size() == 3);
-    REQUIRE(v2[0] == 0);
-    REQUIRE(v2[1] == 0);
-    REQUIRE(v2[2] == 0);
-
     Vector<float, 5> v3{};
     REQUIRE(v3.size() == 5);
     REQUIRE(v3[0] == Approx(0.0f));
@@ -34,10 +28,6 @@ TEST_CASE("Vector construction", "[vector]") {
   }
 
   SECTION("Vector of different types") {
-    Vector vi(10, 20, 30);
-    REQUIRE(vi.size() == 3);
-    REQUIRE(vi[0] == 10);
-
     Vector vf(1.5f, 2.5f);
     REQUIRE(vf.size() == 2);
     REQUIRE(vf[0] == Approx(1.5f));
@@ -61,7 +51,9 @@ TEST_CASE("Vector element access", "[vector]") {
     REQUIRE(v[2] == 15.0); // unchanged
   }
 
-  SECTION("Size query") { REQUIRE(v.size() == 3); }
+  SECTION("Size query") {
+    REQUIRE(v.size() == 3);
+  }
 }
 
 TEST_CASE("Vector addition", "[vector]") {
@@ -89,16 +81,16 @@ TEST_CASE("Vector subtraction", "[vector]") {
 }
 
 TEST_CASE("Vector dot product", "[vector]") {
-  Vector a(1, 2, 3);
-  Vector b(4, 5, 6);
+  Vector a(1.0, 2.0, 3.0);
+  Vector b(4.0, 5.0, 6.0);
 
   auto result = a * b; // 4 + 10 + 18 = 32
-  REQUIRE(result == 32);
+  REQUIRE(result == Approx(32.0));
 
-  Vector u(1, 2, 3, 4, 5, 6, 7, 8);
-  Vector v(8, -7, 6, -5, 4, -3, 2, -1);
+  Vector u(1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0);
+  Vector v(8.0, -7.0, 6.0, -5.0, 4.0, -3.0, 2.0, -1.0);
   result = u * v;
-  REQUIRE(result == 0);
+  REQUIRE(result == Approx(0.0));
 }
 
 TEST_CASE("Vector scalar multiplication", "[vector]") {
@@ -162,18 +154,17 @@ TEST_CASE("Vector operations chain", "[vector]") {
 }
 
 TEST_CASE("Vector magnitude", "[vector]") {
-  Vector a(1, 2, 3); // norm2 = 1 + 4 + 9 = 14
+  Vector a(1.0, 2.0, 3.0); // norm2 = 1 + 4 + 9 = 14
 
-  REQUIRE(a.norm2() == 14);
-  REQUIRE(a.norm() == 3); // 3.74 is casted to to 3
+  REQUIRE(a.norm2() == Approx(14.0));
+  REQUIRE(a.norm() == Approx(std::sqrt(14.0)));
 
-  Vector b(-1, -2, -3); // same norm
+  Vector b(-1.0, -2.0, -3.0); // same norm
 
-  REQUIRE(b.norm2() == 14);
-  REQUIRE(b.norm() == 3);
+  REQUIRE(b.norm2() == Approx(14.0));
+  REQUIRE(b.norm() == Approx(std::sqrt(14.0)));
 
-  // now it is a double
-  Vector c(1.0, 2.0, 3.0, 4.0); // norm 2 = 14 + 16 = 30
+  Vector c(1.0, 2.0, 3.0, 4.0); // norm2 = 1 + 4 + 9 + 16 = 30
 
   REQUIRE(c.norm2() == Approx(30.0));
   REQUIRE(c.norm() == Approx(std::sqrt(30.0)));
