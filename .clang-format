@@ -1,0 +1,39 @@
+---
+Language: Cpp
+Standard: c++20
+IndentWidth: 2
+ColumnLimit: 88
+UseTab: Never
+
+# Template formatting - ENFORCE line breaks
+AlwaysBreakTemplateDeclarations: Yes
+BinPackParameters: false
+BinPackArguments: false
+
+# Function and control flow formatting
+AllowShortFunctionsOnASingleLine: None
+AllowShortIfStatementsOnASingleLine: Never
+AllowShortLambdasOnASingleLine: Inline
+AllowShortBlocksOnASingleLine: Never
+BreakBeforeBraces: Attach
+
+# Spacing
+SpaceBeforeParens: ControlStatements
+SpaceAfterCStyleCast: false
+SpaceInEmptyParentheses: false
+
+# Pointer and reference alignment
+PointerAlignment: Right
+ReferenceAlignment: Right
+
+# Namespace formatting
+NamespaceIndentation: None
+
+# Line breaking
+PenaltyBreakBeforeFirstCallParameter: 100
+PenaltyExcessCharacter: 1000
+
+# Comments
+ReflowComments: true
+MaxEmptyLinesToKeep: 1
+SortIncludes: true
