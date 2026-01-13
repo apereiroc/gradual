@@ -6,39 +6,58 @@
 #include <cstddef>
 #include <limits>
 
-template <typename T, std::size_t N> class Result {
+template <typename T, std::size_t N>
+class Result {
 private:
   Vector<T, N> m_point{}; // optimal point, where the function is minimal
   T m_value{};            // function value at minimum
-  T m_grad{}; // gradient value at minimum, which made the engine to stop
+  T m_grad{};             // gradient value at minimum, which made the engine to stop
   std::size_t m_num_iterations{};
   bool m_converged{};
 
 public:
-  Result(const Vector<T, N> &point, T value, T grad, std::size_t num_iterations,
+  Result(const Vector<T, N> &point,
+         T value,
+         T grad,
+         std::size_t num_iterations,
          bool converged)
-      : m_point(point), m_value(value), m_grad(grad),
-        m_num_iterations(num_iterations), m_converged(converged) {}
+      : m_point(point), m_value(value), m_grad(grad), m_num_iterations(num_iterations),
+        m_converged(converged) {
+  }
 
-  const Vector<T, N> &point() const { return m_point; }
-  T value() const { return m_value; }
-  T grad() const { return m_grad; }
-  std::size_t num_iterations() const { return m_num_iterations; }
-  bool converged() const { return m_converged; }
+  const Vector<T, N> &point() const {
+    return m_point;
+  }
+  T value() const {
+    return m_value;
+  }
+  T grad() const {
+    return m_grad;
+  }
+  std::size_t num_iterations() const {
+    return m_num_iterations;
+  }
+  bool converged() const {
+    return m_converged;
+  }
 };
 
-template <typename T> class Optimiser {
+template <typename T>
+class Optimiser {
 private:
   T m_step{}, m_grad_tol{};
   std::size_t m_max_iterations{};
 
 public:
   Optimiser(T step, T grad_tol, std::size_t max_iterations = 10000)
-      : m_step(step), m_grad_tol(grad_tol), m_max_iterations(max_iterations) {}
+      : m_step(step), m_grad_tol(grad_tol), m_max_iterations(max_iterations) {
+  }
 
   // bounded optimization, (lower, upper)
   template <std::size_t N, typename Func>
-  Result<T, N> run(Func f, const Vector<T, N> &start, const Vector<T, N> &lower,
+  Result<T, N> run(Func f,
+                   const Vector<T, N> &start,
+                   const Vector<T, N> &lower,
                    const Vector<T, N> &upper) {
     std::size_t num_iterations{0};
     Vector<T, N> params{start};
@@ -48,20 +67,17 @@ public:
 
     // main optimisation loop
     // stop when |∇f| < tol or max iterations reached
-    while (grad_norm > m_grad_tol and
-           num_iterations < m_max_iterations) {
+    while (grad_norm > m_grad_tol and num_iterations < m_max_iterations) {
       num_iterations++;
 
       // update params, perform clamping
       for (std::size_t i = 0; i < N; i++) {
-        params[i] =
-            std::clamp(params[i] - m_step * grad_vec[i], lower[i], upper[i]);
+        params[i] = std::clamp(params[i] - m_step * grad_vec[i], lower[i], upper[i]);
       }
 
       // compute new gradient and its magnitude
       grad_vec = gradient(f, params);
       grad_norm = grad_vec.norm();
-
 
       if (grad_norm <= m_grad_tol or num_iterations >= m_max_iterations)
         break;
@@ -99,8 +115,8 @@ public:
 
   // bounded optimization from zero starting point
   template <std::size_t N, typename Func>
-  Result<T, N> run_from_zero(Func f, const Vector<T, N> &lower,
-                              const Vector<T, N> &upper) {
+  Result<T, N>
+  run_from_zero(Func f, const Vector<T, N> &lower, const Vector<T, N> &upper) {
     return run(f, Vector<T, N>{}, lower, upper);
   }
 };

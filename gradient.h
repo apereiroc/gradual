@@ -30,18 +30,17 @@ T get_partial_derivative(Func f, const Vector<T, N> &point) {
   // unpack duals into function call
   // evaluate f(vec(a) + vec(b) eps) = f(vec(a)) + grad_f * vec(b) eps
   // since vec(b) is non-zero only for index Dim, the dual part gives ∂f/∂x_Dim
-  Dual<T> result =
-      [&]<std::size_t... Indices>(std::index_sequence<Indices...>) {
-        return f(duals[Indices]...);
-      }(std::make_index_sequence<N>{});
+  Dual<T> result = [&]<std::size_t... Indices>(std::index_sequence<Indices...>) {
+    return f(duals[Indices]...);
+  }(std::make_index_sequence<N>{});
 
   return result.dual();
 }
 
 // get all gradients using index_sequence
 template <typename T, std::size_t N, typename Func, std::size_t... Dims>
-Vector<T, N> get_gradient_impl(Func f, const Vector<T, N> &point,
-                               std::index_sequence<Dims...>) {
+Vector<T, N>
+get_gradient_impl(Func f, const Vector<T, N> &point, std::index_sequence<Dims...>) {
   Vector<T, N> grad;
   // fill gradients
   (..., (grad[Dims] = get_partial_derivative<T, N, Dims, Func>(f, point)));

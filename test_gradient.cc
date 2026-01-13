@@ -19,7 +19,8 @@ Dual<T> f_3d_quadratic(const Dual<T> &x, const Dual<T> &y, const Dual<T> &z) {
   return x * x + y * y + z * z;
 }
 
-template <typename T> Dual<T> f_2d_mixed(const Dual<T> &x, const Dual<T> &y) {
+template <typename T>
+Dual<T> f_2d_mixed(const Dual<T> &x, const Dual<T> &y) {
   // f(x, y) = x*y + x^2
   // ∂f/∂x = y + 2x, ∂f/∂y = x
   return x * y + x * x;
@@ -193,9 +194,12 @@ TEST_CASE("Gradient with elementary functions", "[gradient]") {
 TEST_CASE("Gradient of 4D function", "[gradient]") {
   // f(w, x, y, z) = w^2 + x^2 + y^2 + z^2
   // ∇f = (2w, 2x, 2y, 2z)
-  auto f = [](const Dual<double> &w, const Dual<double> &x,
+  auto f = [](const Dual<double> &w,
+              const Dual<double> &x,
               const Dual<double> &y,
-              const Dual<double> &z) { return w * w + x * x + y * y + z * z; };
+              const Dual<double> &z) {
+    return w * w + x * x + y * y + z * z;
+  };
 
   Vector point(1.0, 2.0, 3.0, 4.0);
   auto grad = gradient(f, point);
@@ -209,7 +213,9 @@ TEST_CASE("Gradient of 4D function", "[gradient]") {
 TEST_CASE("Gradient of 1D function", "[gradient]") {
   // f(x) = x^2
   // df/dx = 2x
-  auto f = [](const Dual<double> &x) { return x * x; };
+  auto f = [](const Dual<double> &x) {
+    return x * x;
+  };
 
   SECTION("At point (5)") {
     Vector point(5.0);

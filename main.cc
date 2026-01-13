@@ -1,7 +1,10 @@
 #include "optimiser.h"
 #include <fmt/base.h>
 
-template <typename T> T f(const T &x, const T &y) { return sin(x) * sin(y); }
+template <typename T>
+T f(const T &x, const T &y) {
+  return sin(x) * sin(y);
+}
 
 int main() {
 

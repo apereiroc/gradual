@@ -9,7 +9,9 @@ using Catch::Approx;
 
 TEST_CASE("Optimiser: 1D unbounded quadratic", "[optimiser]") {
   // f(x) = x^2, minimum at x = 0
-  auto f = [](const Dual<double> &x) { return x * x; };
+  auto f = [](const Dual<double> &x) {
+    return x * x;
+  };
 
   Vector<double, 1> start{5.0};
   Optimiser<double> opt(0.1, 1e-6, 1000);
@@ -42,8 +44,7 @@ TEST_CASE("Optimiser: 2D unbounded quadratic bowl", "[optimiser]") {
 
 TEST_CASE("Optimiser: 3D unbounded quadratic (MVP example)", "[optimiser]") {
   // f(x,y,z) = (x-1)^2 + (y-2)^2 + (z-3)^2, minimum at (1, 2, 3)
-  auto f = [](const Dual<double> &x, const Dual<double> &y,
-              const Dual<double> &z) {
+  auto f = [](const Dual<double> &x, const Dual<double> &y, const Dual<double> &z) {
     return pow(x - 1, 2.0) + pow(y - 2, 2.0) + pow(z - 3, 2.0);
   };
 
@@ -85,7 +86,9 @@ TEST_CASE("Optimiser: 2D bounded, minimum inside box", "[optimiser]") {
 TEST_CASE("Optimiser: 1D bounded, minimum outside box", "[optimiser]") {
   // f(x) = (x-10)^2, minimum at x = 10
   // Box: [-1, 1], so should clamp to boundary at x = 1
-  auto f = [](const Dual<double> &x) { return (x - 10.0) * (x - 10.0); };
+  auto f = [](const Dual<double> &x) {
+    return (x - 10.0) * (x - 10.0);
+  };
 
   Vector<double, 1> lower{-1.0};
   Vector<double, 1> upper{1.0};
@@ -108,7 +111,9 @@ TEST_CASE("Optimiser: 1D bounded, minimum outside box", "[optimiser]") {
 
 TEST_CASE("Optimiser: max iterations limit", "[optimiser]") {
   // f(x) = x^2, but with very small step and low max_iterations
-  auto f = [](const Dual<double> &x) { return x * x; };
+  auto f = [](const Dual<double> &x) {
+    return x * x;
+  };
 
   Vector<double, 1> start{100.0};
 
@@ -146,10 +151,11 @@ TEST_CASE("Optimiser: Result struct accessors", "[optimiser]") {
 
 TEST_CASE("Optimiser: 4D function", "[optimiser]") {
   // f(w,x,y,z) = (w-1)^2 + (x-2)^2 + (y-3)^2 + (z-4)^2
-  auto f = [](const Dual<double> &w, const Dual<double> &x,
-              const Dual<double> &y, const Dual<double> &z) {
-    return pow(w - 1, 2.0) + pow(x - 2, 2.0) + pow(y - 3, 2.0) +
-           pow(z - 4, 2.0);
+  auto f = [](const Dual<double> &w,
+              const Dual<double> &x,
+              const Dual<double> &y,
+              const Dual<double> &z) {
+    return pow(w - 1, 2.0) + pow(x - 2, 2.0) + pow(y - 3, 2.0) + pow(z - 4, 2.0);
   };
 
   Vector start{0.0, 0.0, 0.0, 0.0};
@@ -170,7 +176,7 @@ TEST_CASE("Optimiser: CTAD with explicit starting point", "[optimiser][api]") {
     return (x - 3.0) * (x - 3.0) + (y - 4.0) * (y - 4.0);
   };
 
-  Vector start{10.0, 10.0};  // CTAD deduces Vector<double, 2>
+  Vector start{10.0, 10.0}; // CTAD deduces Vector<double, 2>
   Optimiser<double> opt(0.1, 1e-6, 1000);
 
   auto result = opt.run(f, start);
@@ -182,8 +188,7 @@ TEST_CASE("Optimiser: CTAD with explicit starting point", "[optimiser][api]") {
 
 TEST_CASE("Optimiser: run_from_zero unbounded", "[optimiser][api]") {
   // Test run_from_zero for clean zero-initialization
-  auto f = [](const Dual<double> &x, const Dual<double> &y,
-              const Dual<double> &z) {
+  auto f = [](const Dual<double> &x, const Dual<double> &y, const Dual<double> &z) {
     return x * x + y * y + z * z;
   };
 
@@ -215,18 +220,20 @@ TEST_CASE("Optimiser: run_from_zero bounded", "[optimiser][api]") {
   // Should clamp to boundary at (2,2)
   REQUIRE(result.point()[0] == Approx(2.0).margin(1e-4));
   REQUIRE(result.point()[1] == Approx(2.0).margin(1e-4));
-  REQUIRE(result.grad() > 1e-6);  // Non-zero gradient at boundary
+  REQUIRE(result.grad() > 1e-6); // Non-zero gradient at boundary
 }
 
 TEST_CASE("Optimiser: CTAD with high-dimensional vector", "[optimiser][api]") {
   // Test CTAD works for high-dimensional vectors
-  auto f = [](const Dual<double> &a, const Dual<double> &b,
-              const Dual<double> &c, const Dual<double> &d,
+  auto f = [](const Dual<double> &a,
+              const Dual<double> &b,
+              const Dual<double> &c,
+              const Dual<double> &d,
               const Dual<double> &e) {
     return a * a + b * b + c * c + d * d + e * e;
   };
 
-  Vector start{1.0, 2.0, 3.0, 4.0, 5.0};  // CTAD: Vector<double, 5>
+  Vector start{1.0, 2.0, 3.0, 4.0, 5.0}; // CTAD: Vector<double, 5>
   Optimiser<double> opt(0.1, 1e-6, 1000);
 
   auto result = opt.run(f, start);
