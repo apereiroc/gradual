@@ -23,7 +23,7 @@ else:
 
 # Create the build environment
 env = Environment(
-    CXX="clang++",
+    # CXX="clang++",
     CXXFLAGS=["-std=c++20", "-Wall", "-Wextra", "-pedantic"] + opt_flags,
     ENV=os.environ,
 )
@@ -76,5 +76,13 @@ env.AlwaysBuild(test_runner)
 
 # Clean target
 env.Clean(
-    ".", ["main", "test_dual", "test_vector", "test_gradient", "test_optimiser", "compile_commands.json"]
+    ".",
+    [
+        "main",
+        "test_dual",
+        "test_vector",
+        "test_gradient",
+        "test_optimiser",
+        "compile_commands.json",
+    ],
 )

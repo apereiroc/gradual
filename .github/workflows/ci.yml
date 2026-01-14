@@ -23,7 +23,7 @@ jobs:
     - name: Install dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y scons libfmt-dev catch2
+        sudo apt-get install -y pkg-config scons libfmt-dev catch2
     
     - name: Build in ${{ matrix.mode }} mode
       run: |
@@ -41,10 +41,26 @@ jobs:
         fi
         echo "compile_commands.json successfully generated"
     
+    - name: Clean build artifacts in ${{ matrix.mode }} mode
+      run: |
+        if [ "${{ matrix.mode }}" = "release" ]; then
+          scons --release -c
+        else
+          scons -c
+        fi
+
     - name: Run tests in ${{ matrix.mode }} mode
       run: |
         if [ "${{ matrix.mode }}" = "release" ]; then
           scons test --release
         else
           scons test
+        fi
+
+    - name: Clean test artifacts in ${{ matrix.mode }} mode
+      run: |
+        if [ "${{ matrix.mode }}" = "release" ]; then
+          scons test --release -c
+        else
+          scons test -c
         fi

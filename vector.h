@@ -1,7 +1,9 @@
 #pragma once
 
 #include <array>
+#include <cmath>
 #include <concepts>
+#include <cstddef>
 
 // Fixed-size numeric vector. Supports element-wise +/- and scaling by scalars,
 // and dot product via operator*(Vector).
