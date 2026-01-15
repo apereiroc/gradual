@@ -44,8 +44,9 @@ example_sources = Glob("examples/*.cc")
 
 example_progs = []
 for src in example_sources:
-    target_name = f"{build_dir}/examples/{src.name[:-3]}"  # Remove .cc extension
-    prog = env.Program(target=target_name, source=src)
+    base_name = src.name[:-3]  # Remove .cc extension
+    obj_file = env.Object(target=f"{build_dir}/examples/{base_name}.o", source=src)
+    prog = env.Program(target=f"{build_dir}/examples/{base_name}", source=obj_file)
     example_progs.append(prog)
 
 # Auto-discover and build all test executables
@@ -53,8 +54,9 @@ test_sources = Glob("tests/*.cc")
 
 test_progs = []
 for src in test_sources:
-    target_name = f"{build_dir}/tests/{src.name[:-3]}"  # Remove .cc extension
-    prog = env_test.Program(target=target_name, source=src)
+    base_name = src.name[:-3]  # Remove .cc extension
+    obj_file = env_test.Object(target=f"{build_dir}/tests/{base_name}.o", source=src)
+    prog = env_test.Program(target=f"{build_dir}/tests/{base_name}", source=obj_file)
     test_progs.append(prog)
 
 # Default target (build examples + emit compile_commands.json)
