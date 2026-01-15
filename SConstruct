@@ -5,7 +5,7 @@ import subprocess
 AddOption(
     "--release",
     action="store_true",
-    help="Build in release mode with optimizations",
+    help="Build in release mode with optimisations",
     default=False,
 )
 
@@ -69,9 +69,10 @@ def run_tests(target, source, env):
     build_mode = "release" if GetOption("release") else "debug"
     test_dir = f"target/{build_mode}/tests"
     
-    # Get all test executables dynamically
+    # Get all test executables dynamically (excluding .o files)
     import glob
-    test_binaries = glob.glob(f"{test_dir}/*")
+    all_files = glob.glob(f"{test_dir}/*")
+    test_binaries = [f for f in all_files if not f.endswith('.o') and os.path.isfile(f)]
     
     for test_path in sorted(test_binaries):
         test_name = os.path.basename(test_path)
