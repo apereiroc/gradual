@@ -127,6 +127,46 @@ TEST_CASE("Dual-scalar interactions", "[dual]") {
   }
 }
 
+TEST_CASE("Dual-integer interactions", "[dual]") {
+  Dual<double> x(4.0, 2.0);
+
+  SECTION("Add integer") {
+    auto r1 = x + 3;
+    auto r2 = 3 + x;
+    REQUIRE(r1.real() == 7.0);
+    REQUIRE(r1.dual() == 2.0);
+    REQUIRE(r2.real() == 7.0);
+    REQUIRE(r2.dual() == 2.0);
+  }
+
+  SECTION("Subtract integer") {
+    auto r1 = x - 1;
+    auto r2 = 10 - x;
+    REQUIRE(r1.real() == 3.0);
+    REQUIRE(r1.dual() == 2.0);
+    REQUIRE(r2.real() == 6.0);
+    REQUIRE(r2.dual() == -2.0);
+  }
+
+  SECTION("Multiply integer") {
+    auto r1 = x * 2;
+    auto r2 = 5 * x;
+    REQUIRE(r1.real() == 8.0);
+    REQUIRE(r1.dual() == 4.0);
+    REQUIRE(r2.real() == 20.0);
+    REQUIRE(r2.dual() == 10.0);
+  }
+
+  SECTION("Divide integer") {
+    auto r1 = x / 2;    // (4,2)/2 -> (2,1)
+    auto r2 = 20 / x;   // (20/x, -20*grad/x^2)
+    REQUIRE(r1.real() == 2.0);
+    REQUIRE(r1.dual() == 1.0);
+    REQUIRE(r2.real() == 5.0);
+    REQUIRE(r2.dual() == Approx(-2.5));
+  }
+}
+
 TEST_CASE("Derivative of x^2", "[dual][derivatives]") {
   // Test d/dx(x^2) = 2x at various points
   auto f = [](Dual<double> x) {
@@ -284,6 +324,36 @@ TEST_CASE("Elementary function: pow", "[dual][elementary]") {
     auto result = pow(x, -1.0);
     REQUIRE(result.real() == 0.5);           // 2^(-1) = 0.5
     REQUIRE(result.dual() == Approx(-0.25)); // -1*2^(-2) = -0.25
+  }
+}
+
+TEST_CASE("Elementary function: pow with integer exponent", "[dual][elementary]") {
+  SECTION("x^2 at x = 3") {
+    Dual<double> x(3.0, 1.0);
+    auto result = pow(x, 2);
+    REQUIRE(result.real() == 9.0); // 3^2 = 9
+    REQUIRE(result.dual() == 6.0); // 2*3^1 = 6
+  }
+
+  SECTION("x^3 at x = 2") {
+    Dual<double> x(2.0, 1.0);
+    auto result = pow(x, 3);
+    REQUIRE(result.real() == 8.0);  // 2^3 = 8
+    REQUIRE(result.dual() == 12.0); // 3*2^2 = 12
+  }
+
+  SECTION("x^5 at x = 1") {
+    Dual<double> x(1.0, 1.0);
+    auto result = pow(x, 5);
+    REQUIRE(result.real() == 1.0); // 1^5 = 1
+    REQUIRE(result.dual() == 5.0); // 5*1^4 = 5
+  }
+
+  SECTION("x^(-2) at x = 2") {
+    Dual<double> x(2.0, 1.0);
+    auto result = pow(x, -2);
+    REQUIRE(result.real() == 0.25);           // 2^(-2) = 0.25
+    REQUIRE(result.dual() == Approx(-0.25));  // -2*2^(-3) = -0.25
   }
 }
 
