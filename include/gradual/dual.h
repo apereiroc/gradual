@@ -119,6 +119,13 @@ Dual<T> pow(const Dual<T> &x, const T &n) {
   return {r, x.dual() * n * std::pow(a, n - T(1))};
 }
 
+// Overload for integer exponents (allows pow(x, 2) instead of pow(x, 2.0))
+template <typename T, std::integral I>
+  requires std::floating_point<T>
+Dual<T> pow(const Dual<T> &x, I n) {
+  return pow(x, T(n));
+}
+
 // exp(a + b ε) = exp(a) + b·exp(a) ε
 template <typename T>
   requires std::floating_point<T>
