@@ -8,13 +8,11 @@
 # ignore object files
 *.o
 
-# ignore test objects
-test_*
-!test_*.cc
+# scons build directory (Cargo-like structure)
+target/
 
-# ignore main files
-main
-main.o
+# cmake build directory
+build/
 
 # scons stuff
 *.dblite

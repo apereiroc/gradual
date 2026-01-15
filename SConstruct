@@ -12,6 +12,7 @@ AddOption(
 # Determine build mode
 release_mode = GetOption("release")
 build_mode = "release" if release_mode else "debug"
+build_dir = f"target/{build_mode}"
 
 # Set optimization flags based on build mode
 if release_mode:
@@ -25,11 +26,11 @@ else:
 env = Environment(
     # CXX="clang++",
     CXXFLAGS=["-std=c++20", "-Wall", "-Wextra", "-pedantic"] + opt_flags,
+    CPPPATH=["include"],
     ENV=os.environ,
 )
 env.Tool("compilation_db")
 compdb = env.CompilationDatabase()
-
 
 # Parse pkg-config for fmt library
 env.ParseConfig("pkg-config --cflags --libs fmt")
@@ -38,51 +39,52 @@ env.ParseConfig("pkg-config --cflags --libs fmt")
 env_test = env.Clone()
 env_test.ParseConfig("pkg-config --cflags --libs catch2-with-main")
 
-# Build main executable
-main = env.Program(target="main", source="main.cc")
+# Auto-discover and build all example executables
+example_sources = Glob("examples/*.cc")
 
-# Build test executables
-test_dual = env_test.Program(target="test_dual", source="test_dual.cc")
+example_progs = []
+for src in example_sources:
+    target_name = f"{build_dir}/examples/{src.name[:-3]}"  # Remove .cc extension
+    prog = env.Program(target=target_name, source=src)
+    example_progs.append(prog)
 
-test_vector = env_test.Program(target="test_vector", source="test_vector.cc")
+# Auto-discover and build all test executables
+test_sources = Glob("tests/*.cc")
 
-test_gradient = env_test.Program(target="test_gradient", source="test_gradient.cc")
+test_progs = []
+for src in test_sources:
+    target_name = f"{build_dir}/tests/{src.name[:-3]}"  # Remove .cc extension
+    prog = env_test.Program(target=target_name, source=src)
+    test_progs.append(prog)
 
-test_optimiser = env_test.Program(target="test_optimiser", source="test_optimiser.cc")
-
-# Default target (also emit compile_commands.json)
-Default([main, compdb])
+# Default target (build examples + emit compile_commands.json)
+Default(example_progs + [compdb])
 
 
 # Test target - build and run all tests
 def run_tests(target, source, env):
     """Run all test executables"""
-    tests = ["test_dual", "test_vector", "test_gradient", "test_optimiser"]
-    for test in tests:
+    build_mode = "release" if GetOption("release") else "debug"
+    test_dir = f"target/{build_mode}/tests"
+    
+    # Get all test executables dynamically
+    import glob
+    test_binaries = glob.glob(f"{test_dir}/*")
+    
+    for test_path in sorted(test_binaries):
+        test_name = os.path.basename(test_path)
         print(f"\n{'='*80}")
-        print(f"Running {test}...")
+        print(f"Running {test_name}...")
         print("=" * 80)
-        result = subprocess.run([f"./{test}"], shell=False)
+        result = subprocess.run([test_path], shell=False)
         if result.returncode != 0:
             return result.returncode
     return 0
 
-
-# Create test alias that depends on test executables
-test_targets = [test_dual, test_vector, test_gradient, test_optimiser]
-test_runner = env.Command("run_tests", test_targets, run_tests)
+# Create test alias that depends on all test executables
+test_runner = env.Command("run_tests", test_progs, run_tests)
 env.Alias("test", test_runner)
 env.AlwaysBuild(test_runner)
 
-# Clean target
-env.Clean(
-    ".",
-    [
-        "main",
-        "test_dual",
-        "test_vector",
-        "test_gradient",
-        "test_optimiser",
-        "compile_commands.json",
-    ],
-)
+# Clean target - remove entire target directory
+env.Clean(".", ["target", "compile_commands.json"])
