@@ -66,13 +66,15 @@ The template-based design with automatic dimension deduction allows you to write
 
 ```c++
 constexpr double step = 1.0e-3, grad_tol = 1.0e-6;
-Optimiser opt(step, grad_tol); // Optimiser<double> is deduced here
+constexpr std::size_t maxiters = 10000;
+Optimiser opt(step, grad_tol, maxiters); // Optimiser<double> is deduced here
 
 fmt::print("Running optimiser... ");
 // minimise_from_zero sets starting point to zeroed n-vector
-// n must be provided
-auto result = opt.minimise_from_zero<2>([](auto x, auto y){ return x*x + y*y; }); // result is Result<double, 2> and contains information about the minimisation
-
+// n=2 must be provided
+auto result = opt.minimise_from_zero<2>([](auto x, auto y) {
+  return x * x + y * y;
+}); // result is Result<double, 2> and contains information about the minimisation
 
 fmt::print("done\n");
 // converged or hit maximum iterations?
@@ -89,7 +91,7 @@ Vector init{10.0, -5.0, 3.0}; // CTAD deduces Vector<double, 3>
 Optimiser opt(1.e-3, 1.e-6);
 
 auto res = opt.minimise([](auto x, auto y, auto z) { 
-    return pow(x-1, 2.0) + pow(y-2, 2.0) + pow(z-5, 2.0); 
+    return pow(x-1, 2) + pow(y-2, 2) + pow(z-5, 2); 
 }, init);
 
 fmt::print("Converged: {}\n", res.converged());
@@ -100,20 +102,20 @@ fmt::print("Best point: ({:.2f}, {:.2f}, {:.2f})\n", p[0], p[1], p[2]);
 If you have a complex function you can't easily express as a lambda—e.g., it touches files or GPU code—you can still use Gradual and templates to find its minimum
 
 ```c++
-template<typename T>
 class MyModel {
 public:
+    // Templated operator() works with both double and Dual<double>
+    template<typename T>
     T operator()(T p1, T p2, T p3, T p4, T p5) const {
         // Hundreds of lines
         // ...
     }
 };
 
-
 Vector init{1.0, -1.0, 278.0, -3.14, 0.0};
 
 MyModel model;
-auto res = opt.minimise([&](auto... p) { return model(p...); }, init);
+auto res = opt.minimise(model, init); // Easy
 ```
 
 
