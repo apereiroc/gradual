@@ -7,21 +7,56 @@ Currently, it supports forward-mode differentiation built on templated *dual num
 
 ## Build
 
-A **SCons** file is provided to build and test the software. SCons is configured to act like `cargo` in Rust: by default, binaries are built in debug mode; optimised builds use the `--release` flag.
+### SCons (Recommended)
+
+**SCons** is the primary build system, configured to act like `cargo` in Rust: binaries are built in debug mode by default; optimised builds use the `--release` flag. The build system automatically discovers `.cc` files in `examples/` and `tests/` directories—no need to manually update the build file when adding new examples or tests.
 
 ```bash
-scons                # debug build of main.cc
-scons --release      # optimised build
-scons test           # debug build+run of tests
-scons test --release # optimised build+run of tests
+scons                # debug build (-O0 -g) → target/debug/examples/
+scons --release      # release build (-O2) → target/release/examples/
+scons test           # debug build+run all tests → target/debug/tests/
+scons test --release # release build+run all tests → target/release/tests/
 ```
 
-A traditional **Makefile** is also provided in case you don't have `scons` installed. However, it isn't as versatile as SCons and will likely be removed soon.
+**Directory structure:**
+- `target/debug/examples/` - Debug example executables
+- `target/debug/tests/` - Debug test executables
+- `target/release/examples/` - Release example executables
+- `target/release/tests/` - Release test executables
+
+### CMake
+
+**CMake** is provided for users who prefer it or need integration with other CMake-based projects. I personally only use `scons`.
+
+Gradual is a **header-only library**, so CMake creates an INTERFACE target that simply provides include paths and dependencies.
 
 ```bash
-make       # build of main.cc and tests
-make test  # execution of tests
+# Configure and build
+mkdir build && cd build
+cmake ..                  # configure (or cmake -DCMAKE_BUILD_TYPE=Release ..)
+cmake --build .           # build all examples and tests
+
+# Run tests
+ctest                     # or: ctest --output-on-failure
+
+# Run individual examples
+./examples/basic_minimisation
 ```
+
+**CMake options:**
+- `CMAKE_BUILD_TYPE` - `Debug` (default) or `Release`
+- `BUILD_TESTING` - `ON` (default) or `OFF` to skip building tests
+
+**Using Gradual in your CMake project:**
+
+After installation (`cmake --install build`), you can use Gradual in your project:
+
+```cmake
+find_package(Gradual REQUIRED)
+target_link_libraries(your_target PRIVATE Gradual::gradual)
+```
+
+Since Gradual is header-only, `target_link_libraries` only adds include directories and the `fmt` dependency to your target.
 
 ## API examples 
 
