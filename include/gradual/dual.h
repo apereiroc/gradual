@@ -97,6 +97,31 @@ constexpr Dual<T> operator/(const T &scalar, const Dual<T> &dual) {
   return Dual<T>(scalar / dual.real(), -scalar * dual.dual() / denom);
 }
 
+// Integer-Dual binary ops (allows operations like 1 + x where x is Dual)
+template <typename T, std::integral I>
+  requires std::floating_point<T>
+constexpr Dual<T> operator+(I scalar, const Dual<T> &dual) {
+  return T(scalar) + dual;
+}
+
+template <typename T, std::integral I>
+  requires std::floating_point<T>
+constexpr Dual<T> operator-(I scalar, const Dual<T> &dual) {
+  return T(scalar) - dual;
+}
+
+template <typename T, std::integral I>
+  requires std::floating_point<T>
+constexpr Dual<T> operator*(I scalar, const Dual<T> &dual) {
+  return T(scalar) * dual;
+}
+
+template <typename T, std::integral I>
+  requires std::floating_point<T>
+constexpr Dual<T> operator/(I scalar, const Dual<T> &dual) {
+  return T(scalar) / dual;
+}
+
 // Elementary operations
 // These functions follow standard derivative rules and operate on Dual<T> where
 // T is floating-point
@@ -117,6 +142,13 @@ Dual<T> pow(const Dual<T> &x, const T &n) {
   const T a = x.real();
   const T r = std::pow(a, n);
   return {r, x.dual() * n * std::pow(a, n - T(1))};
+}
+
+// Overload for integer exponents (allows pow(x, 2) instead of pow(x, 2.0))
+template <typename T, std::integral I>
+  requires std::floating_point<T>
+Dual<T> pow(const Dual<T> &x, I n) {
+  return pow(x, T(n));
 }
 
 // exp(a + b ε) = exp(a) + b·exp(a) ε

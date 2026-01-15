@@ -7,21 +7,56 @@ Currently, it supports forward-mode differentiation built on templated *dual num
 
 ## Build
 
-A **SCons** file is provided to build and test the software. SCons is configured to act like `cargo` in Rust: by default, binaries are built in debug mode; optimised builds use the `--release` flag.
+### SCons (Recommended)
+
+**SCons** is the primary build system, configured to act like `cargo` in Rust: binaries are built in debug mode by default; optimised builds use the `--release` flag. The build system automatically discovers `.cc` files in `examples/` and `tests/` directories—no need to manually update the build file when adding new examples or tests.
 
 ```bash
-scons                # debug build of main.cc
-scons --release      # optimised build
-scons test           # debug build+run of tests
-scons test --release # optimised build+run of tests
+scons                # debug build (-O0 -g) → target/debug/examples/
+scons --release      # release build (-O2) → target/release/examples/
+scons test           # debug build+run all tests → target/debug/tests/
+scons test --release # release build+run all tests → target/release/tests/
 ```
 
-A traditional **Makefile** is also provided in case you don't have `scons` installed. However, it isn't as versatile as SCons and will likely be removed soon.
+**Directory structure:**
+- `target/debug/examples/` - Debug example executables
+- `target/debug/tests/` - Debug test executables
+- `target/release/examples/` - Release example executables
+- `target/release/tests/` - Release test executables
+
+### CMake
+
+**CMake** is provided for users who prefer it or need integration with other CMake-based projects. I personally only use `scons`.
+
+Gradual is a **header-only library**, so CMake creates an INTERFACE target that simply provides include paths and dependencies.
 
 ```bash
-make       # build of main.cc and tests
-make test  # execution of tests
+# Configure and build
+mkdir build && cd build
+cmake ..                  # configure (or cmake -DCMAKE_BUILD_TYPE=Release ..)
+cmake --build .           # build all examples and tests
+
+# Run tests
+ctest                     # or: ctest --output-on-failure
+
+# Run individual examples
+./examples/basic_minimisation
 ```
+
+**CMake options:**
+- `CMAKE_BUILD_TYPE` - `Debug` (default) or `Release`
+- `BUILD_TESTING` - `ON` (default) or `OFF` to skip building tests
+
+**Using Gradual in your CMake project:**
+
+After installation (`cmake --install build`), you can use Gradual in your project:
+
+```cmake
+find_package(Gradual REQUIRED)
+target_link_libraries(your_target PRIVATE Gradual::gradual)
+```
+
+Since Gradual is header-only, `target_link_libraries` only adds include directories and the `fmt` dependency to your target.
 
 ## API examples 
 
@@ -31,13 +66,15 @@ The template-based design with automatic dimension deduction allows you to write
 
 ```c++
 constexpr double step = 1.0e-3, grad_tol = 1.0e-6;
-Optimiser opt(step, grad_tol); // Optimiser<double> is deduced here
+constexpr std::size_t maxiters = 10000;
+Optimiser opt(step, grad_tol, maxiters); // Optimiser<double> is deduced here
 
 fmt::print("Running optimiser... ");
 // minimise_from_zero sets starting point to zeroed n-vector
-// n must be provided
-auto result = opt.minimise_from_zero<2>([](auto x, auto y){ return x*x + y*y; }); // result is Result<double, 2> and contains information about the minimisation
-
+// n=2 must be provided
+auto result = opt.minimise_from_zero<2>([](auto x, auto y) {
+  return x * x + y * y;
+}); // result is Result<double, 2> and contains information about the minimisation
 
 fmt::print("done\n");
 // converged or hit maximum iterations?
@@ -54,7 +91,7 @@ Vector init{10.0, -5.0, 3.0}; // CTAD deduces Vector<double, 3>
 Optimiser opt(1.e-3, 1.e-6);
 
 auto res = opt.minimise([](auto x, auto y, auto z) { 
-    return pow(x-1, 2.0) + pow(y-2, 2.0) + pow(z-5, 2.0); 
+    return pow(x-1, 2) + pow(y-2, 2) + pow(z-5, 2); 
 }, init);
 
 fmt::print("Converged: {}\n", res.converged());
@@ -65,20 +102,20 @@ fmt::print("Best point: ({:.2f}, {:.2f}, {:.2f})\n", p[0], p[1], p[2]);
 If you have a complex function you can't easily express as a lambda—e.g., it touches files or GPU code—you can still use Gradual and templates to find its minimum
 
 ```c++
-template<typename T>
 class MyModel {
 public:
+    // Templated operator() works with both double and Dual<double>
+    template<typename T>
     T operator()(T p1, T p2, T p3, T p4, T p5) const {
         // Hundreds of lines
         // ...
     }
 };
 
-
 Vector init{1.0, -1.0, 278.0, -3.14, 0.0};
 
 MyModel model;
-auto res = opt.minimise([&](auto... p) { return model(p...); }, init);
+auto res = opt.minimise(model, init); // Easy
 ```
 
 
