@@ -1,7 +1,7 @@
-#include "dual.h"
-#include "gradient.h"
-#include "optimiser.h"
-#include "vector.h"
+#include <gradual/dual.h>
+#include <gradual/gradient.h>
+#include <gradual/optimiser.h>
+#include <gradual/vector.h>
 #include <catch2/catch_approx.hpp>
 #include <catch2/catch_test_macros.hpp>
 
