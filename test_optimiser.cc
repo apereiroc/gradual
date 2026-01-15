@@ -16,7 +16,7 @@ TEST_CASE("Optimiser: 1D unbounded quadratic", "[optimiser]") {
   Vector<double, 1> start{5.0};
   Optimiser<double> opt(0.1, 1e-6, 1000);
 
-  auto result = opt.run(f, start);
+  auto result = opt.minimise(f, start);
 
   REQUIRE(result.converged());
   REQUIRE(result.point()[0] == Approx(0.0).margin(1e-4));
@@ -33,7 +33,7 @@ TEST_CASE("Optimiser: 2D unbounded quadratic bowl", "[optimiser]") {
   Vector<double, 2> start{10.0, 10.0};
   Optimiser<double> opt(0.1, 1e-6, 1000);
 
-  auto result = opt.run(f, start);
+  auto result = opt.minimise(f, start);
 
   REQUIRE(result.converged());
   REQUIRE(result.point()[0] == Approx(1.0).margin(1e-4));
@@ -51,7 +51,7 @@ TEST_CASE("Optimiser: 3D unbounded quadratic (MVP example)", "[optimiser]") {
   Vector<double, 3> start{10.0, 10.0, 10.0};
   Optimiser<double> opt(0.1, 1e-6, 1000);
 
-  auto result = opt.run(f, start);
+  auto result = opt.minimise(f, start);
 
   REQUIRE(result.converged());
   REQUIRE(result.point()[0] == Approx(1.0).margin(1e-4));
@@ -75,7 +75,7 @@ TEST_CASE("Optimiser: 2D bounded, minimum inside box", "[optimiser]") {
 
   Optimiser<double> opt(0.1, 1e-6, 1000);
 
-  auto result = opt.run(f, start, lower, upper);
+  auto result = opt.minimise(f, start, lower, upper);
 
   REQUIRE(result.converged());
   REQUIRE(result.point()[0] == Approx(1.0).margin(1e-4));
@@ -96,7 +96,7 @@ TEST_CASE("Optimiser: 1D bounded, minimum outside box", "[optimiser]") {
 
   Optimiser<double> opt(0.1, 1e-6, 1000);
 
-  auto result = opt.run(f, start, lower, upper);
+  auto result = opt.minimise(f, start, lower, upper);
 
   // Should reach the boundary at x = 1
   REQUIRE(result.point()[0] == Approx(1.0).margin(1e-4));
@@ -120,7 +120,7 @@ TEST_CASE("Optimiser: max iterations limit", "[optimiser]") {
   // Small step, tight tolerance, but only 10 iterations
   Optimiser<double> opt(0.001, 1e-10, 10);
 
-  auto result = opt.run(f, start);
+  auto result = opt.minimise(f, start);
 
   // Should hit max iterations before converging
   REQUIRE(result.num_iterations() == 10);
@@ -136,7 +136,7 @@ TEST_CASE("Optimiser: Result struct accessors", "[optimiser]") {
   Vector<double, 2> start{5.0, 5.0};
   Optimiser<double> opt(0.1, 1e-6, 1000);
 
-  auto result = opt.run(f, start);
+  auto result = opt.minimise(f, start);
 
   // Verify all accessors return valid values
   REQUIRE(result.point()[0] >= -1e10);
@@ -161,7 +161,7 @@ TEST_CASE("Optimiser: 4D function", "[optimiser]") {
   Vector start{0.0, 0.0, 0.0, 0.0};
   Optimiser<double> opt(0.1, 1e-6, 1000);
 
-  auto result = opt.run(f, start);
+  auto result = opt.minimise(f, start);
 
   REQUIRE(result.converged());
   REQUIRE(result.point()[0] == Approx(1.0).margin(1e-4));
@@ -179,22 +179,22 @@ TEST_CASE("Optimiser: CTAD with explicit starting point", "[optimiser][api]") {
   Vector start{10.0, 10.0}; // CTAD deduces Vector<double, 2>
   Optimiser<double> opt(0.1, 1e-6, 1000);
 
-  auto result = opt.run(f, start);
+  auto result = opt.minimise(f, start);
 
   REQUIRE(result.converged());
   REQUIRE(result.point()[0] == Approx(3.0).margin(1e-4));
   REQUIRE(result.point()[1] == Approx(4.0).margin(1e-4));
 }
 
-TEST_CASE("Optimiser: run_from_zero unbounded", "[optimiser][api]") {
-  // Test run_from_zero for clean zero-initialization
+TEST_CASE("Optimiser: minimise_from_zero unbounded", "[optimiser][api]") {
+  // Test minimise_from_zero for clean zero-initialisation
   auto f = [](const Dual<double> &x, const Dual<double> &y, const Dual<double> &z) {
     return x * x + y * y + z * z;
   };
 
   Optimiser<double> opt(0.1, 1e-6, 1000);
 
-  auto result = opt.run_from_zero<3>(f);
+  auto result = opt.minimise_from_zero<3>(f);
 
   REQUIRE(result.converged());
   REQUIRE(result.point()[0] == Approx(0.0).margin(1e-4));
@@ -203,8 +203,8 @@ TEST_CASE("Optimiser: run_from_zero unbounded", "[optimiser][api]") {
   REQUIRE(result.value() == Approx(0.0).margin(1e-6));
 }
 
-TEST_CASE("Optimiser: run_from_zero bounded", "[optimiser][api]") {
-  // Test run_from_zero with bounds
+TEST_CASE("Optimiser: minimise_from_zero bounded", "[optimiser][api]") {
+  // Test minimise_from_zero with bounds
   auto f = [](const Dual<double> &x, const Dual<double> &y) {
     return (x - 5.0) * (x - 5.0) + (y - 5.0) * (y - 5.0);
   };
@@ -214,7 +214,7 @@ TEST_CASE("Optimiser: run_from_zero bounded", "[optimiser][api]") {
 
   Optimiser<double> opt(0.1, 1e-6, 1000);
 
-  auto result = opt.run_from_zero<2>(f, lower, upper);
+  auto result = opt.minimise_from_zero<2>(f, lower, upper);
 
   // Minimum is at (5,5) but box is [-2,2] x [-2,2]
   // Should clamp to boundary at (2,2)
@@ -236,7 +236,7 @@ TEST_CASE("Optimiser: CTAD with high-dimensional vector", "[optimiser][api]") {
   Vector start{1.0, 2.0, 3.0, 4.0, 5.0}; // CTAD: Vector<double, 5>
   Optimiser<double> opt(0.1, 1e-6, 1000);
 
-  auto result = opt.run(f, start);
+  auto result = opt.minimise(f, start);
 
   REQUIRE(result.converged());
   for (size_t i = 0; i < 5; i++) {

@@ -14,7 +14,7 @@ int main() {
 
   fmt::print("Running optimiser... ");
 
-  auto res = opt.run_from_zero<2>([](auto x, auto y) { return x * x + y * y; });
+  auto res = opt.minimise_from_zero<2>([](auto x, auto y) { return x * x + y * y; });
 
   fmt::print("done\n");
 

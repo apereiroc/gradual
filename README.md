@@ -2,12 +2,12 @@
 
 **Gradual** (gradients and duals) is a minimalist C++20 automatic differentiation library prioritising clarity and modern design over raw performance.
 
-Currently, it supports forward-mode differentiation built around templated *dual numbers*, providing machine-precision gradients and enabling optimisation of functions via gradient descent.
+Currently, it supports forward-mode differentiation built on templated *dual numbers*, providing machine-precision gradients and enabling optimisation of functions via gradient descent
 
 
 ## Build
 
-A **SCons** file is provided to build and test the software. SCons is configured to act like `cargo` in Rust: by default, binaries are built in debug mode; optimised builds are created with the `--release` flag.
+A **SCons** file is provided to build and test the software. SCons is configured to act like `cargo` in Rust: by default, binaries are built in debug mode; optimised builds use the `--release` flag.
 
 ```bash
 scons                # debug build of main.cc
@@ -16,7 +16,7 @@ scons test           # debug build+run of tests
 scons test --release # optimised build+run of tests
 ```
 
-A traditional **Makefile** is also provided in case you don't have `scons` installed. However, it is not designed to be as versatile as SCons and will probably be removed in the near future.
+A traditional **Makefile** is also provided in case you don't have `scons` installed. However, it isn't as versatile as SCons and will likely be removed soon.
 
 ```bash
 make       # build of main.cc and tests
@@ -25,7 +25,7 @@ make test  # execution of tests
 
 ## API examples 
 
-Some of the elementary functions are provided for templated dual numbers, so you can use `sqrt`, `pow`, `exp`, `log`, `sin`, `cos`, and `tan` for templated functions which work on both double-precision and dual numbers.
+The library provides elementary functions for templated dual numbers, so you can use `sqrt`, `pow`, `exp`, `log`, `sin`, `cos`, and `tan` in templated functions that work on both double-precision and dual numbers.
 
 The template-based design with automatic dimension deduction allows you to write your function with `auto` parameters and optimise:
 
@@ -34,9 +34,9 @@ constexpr double step = 1.0e-3, grad_tol = 1.0e-6;
 Optimiser opt(step, grad_tol); // Optimiser<double> is deduced here
 
 fmt::print("Running optimiser... ");
-// run_from_zero sets starting point to zeroed n-vector
+// minimise_from_zero sets starting point to zeroed n-vector
 // n must be provided
-auto result = opt.run_from_zero<2>([](auto x, auto y){ return x*x + y*y; }); // result is Result<double, 2> and contains information about the optimisation
+auto result = opt.minimise_from_zero<2>([](auto x, auto y){ return x*x + y*y; }); // result is Result<double, 2> and contains information about the minimisation
 
 
 fmt::print("done\n");
@@ -53,7 +53,7 @@ Vector init{10.0, -5.0, 3.0}; // CTAD deduces Vector<double, 3>
 
 Optimiser opt(1.e-3, 1.e-6);
 
-auto res = opt.run([](auto x, auto y, auto z) { 
+auto res = opt.minimise([](auto x, auto y, auto z) { 
     return pow(x-1, 2.0) + pow(y-2, 2.0) + pow(z-5, 2.0); 
 }, init);
 
@@ -62,7 +62,7 @@ auto p = res.point(); // deduced to Vector<double, 3>
 fmt::print("Best point: ({:.2f}, {:.2f}, {:.2f})\n", p[0], p[1], p[2]);
 ```
 
-Maybe you have a complex function that you cannot easily write in a lambda function, because you work with files, GPU acceleration, etc. You can still use Gradual and templates to find the minimum of your function
+If you have a complex function you can't easily express as a lambda—e.g., it touches files or GPU code—you can still use Gradual and templates to find its minimum
 
 ```c++
 template<typename T>
@@ -70,6 +70,7 @@ class MyModel {
 public:
     T operator()(T p1, T p2, T p3, T p4, T p5) const {
         // Hundreds of lines
+        // ...
     }
 };
 
@@ -77,7 +78,7 @@ public:
 Vector init{1.0, -1.0, 278.0, -3.14, 0.0};
 
 MyModel model;
-auto res = opt.run([&](auto... p) { return model(p...); }, init);
+auto res = opt.minimise([&](auto... p) { return model(p...); }, init);
 ```
 
 
