@@ -97,6 +97,31 @@ constexpr Dual<T> operator/(const T &scalar, const Dual<T> &dual) {
   return Dual<T>(scalar / dual.real(), -scalar * dual.dual() / denom);
 }
 
+// Integer-Dual binary ops (allows operations like 1 + x where x is Dual)
+template <typename T, std::integral I>
+  requires std::floating_point<T>
+constexpr Dual<T> operator+(I scalar, const Dual<T> &dual) {
+  return T(scalar) + dual;
+}
+
+template <typename T, std::integral I>
+  requires std::floating_point<T>
+constexpr Dual<T> operator-(I scalar, const Dual<T> &dual) {
+  return T(scalar) - dual;
+}
+
+template <typename T, std::integral I>
+  requires std::floating_point<T>
+constexpr Dual<T> operator*(I scalar, const Dual<T> &dual) {
+  return T(scalar) * dual;
+}
+
+template <typename T, std::integral I>
+  requires std::floating_point<T>
+constexpr Dual<T> operator/(I scalar, const Dual<T> &dual) {
+  return T(scalar) / dual;
+}
+
 // Elementary operations
 // These functions follow standard derivative rules and operate on Dual<T> where
 // T is floating-point
