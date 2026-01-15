@@ -53,12 +53,12 @@ public:
       : m_step(step), m_grad_tol(grad_tol), m_max_iterations(max_iterations) {
   }
 
-  // bounded optimization, (lower, upper)
+  // bounded minimisation, (lower, upper)
   template <std::size_t N, typename Func>
-  Result<T, N> run(Func f,
-                   const Vector<T, N> &start,
-                   const Vector<T, N> &lower,
-                   const Vector<T, N> &upper) {
+  Result<T, N> minimise(Func f,
+                        const Vector<T, N> &start,
+                        const Vector<T, N> &lower,
+                        const Vector<T, N> &upper) {
     std::size_t num_iterations{0};
     Vector<T, N> params{start};
     Vector<T, N> grad_vec{gradient(f, params)}; //  gradient at initial params
@@ -96,27 +96,27 @@ public:
     return Result<T, N>(params, value, grad_norm, num_iterations, converged);
   }
 
-  // unbounded optimization, (-infty, infty)
+  // unbounded minimisation, (-infty, infty)
   template <std::size_t N, typename Func>
-  Result<T, N> run(Func f, const Vector<T, N> &start) {
+  Result<T, N> minimise(Func f, const Vector<T, N> &start) {
     Vector<T, N> lower{}, upper{};
     for (std::size_t i = 0; i < N; i++) {
       lower[i] = -std::numeric_limits<T>::max();
       upper[i] = std::numeric_limits<T>::max();
     }
-    return run(f, start, lower, upper);
+    return minimise(f, start, lower, upper);
   }
 
-  // unbounded optimization from zero starting point
+  // unbounded minimisation from zero starting point
   template <std::size_t N, typename Func>
-  Result<T, N> run_from_zero(Func f) {
-    return run(f, Vector<T, N>{});
+  Result<T, N> minimise_from_zero(Func f) {
+    return minimise(f, Vector<T, N>{});
   }
 
-  // bounded optimization from zero starting point
+  // bounded minimisation from zero starting point
   template <std::size_t N, typename Func>
   Result<T, N>
-  run_from_zero(Func f, const Vector<T, N> &lower, const Vector<T, N> &upper) {
-    return run(f, Vector<T, N>{}, lower, upper);
+  minimise_from_zero(Func f, const Vector<T, N> &lower, const Vector<T, N> &upper) {
+    return minimise(f, Vector<T, N>{}, lower, upper);
   }
 };
